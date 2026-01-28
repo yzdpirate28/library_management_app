@@ -10,15 +10,14 @@ const BookForm = ({ edit = false }) => {
     const { isAdmin } = useAuth();
     
     const [formData, setFormData] = useState({
-        titre: '',
-        auteur: '',
-        description: '',
-        categorie: '',
-        isbn: '',
-        date_publication: '',
-        nombre_exemplaires: 1,
-        image: null
+  titre: '',
+  auteur: '',
+  description: '',
+  category_id: '',
+  nombre_exemplaires: 1,
+  image: null
     });
+
     const [previewImage, setPreviewImage] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -187,29 +186,20 @@ const BookForm = ({ edit = false }) => {
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
                                             <Form.Label>Catégorie</Form.Label>
-                                            <Form.Select
-                                                name="categorie"
-                                                value={formData.categorie}
-                                                onChange={handleChange}
-                                            >
-                                                <option value="">Sélectionner une catégorie</option>
-                                                {categories.map((cat, index) => (
-                                                    <option key={index} value={cat}>{cat}</option>
-                                                ))}
-                                                <option value="new-category">+ Nouvelle catégorie</option>
-                                            </Form.Select>
+             <Form.Select
+  name="category_id"
+  value={formData.category_id}
+  onChange={handleChange}
+>
+  <option value="">Sélectionner une catégorie</option>
+  {categories.map((cat) => (
+    <option key={cat.id} value={cat.id}>
+      {cat.nom}
+    </option>
+  ))}
+</Form.Select>
+
                                             
-                                            {formData.categorie === 'new-category' && (
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Entrer la nouvelle catégorie"
-                                                    className="mt-2"
-                                                    onChange={(e) => setFormData({
-                                                        ...formData,
-                                                        categorie: e.target.value
-                                                    })}
-                                                />
-                                            )}
                                         </Form.Group>
                                     </Col>
                                 </Row>

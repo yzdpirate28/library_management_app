@@ -5,33 +5,43 @@ const fs = require('fs');
 
 const bookController = {
     // Créer un livre
-    createBook: async (req, res) => {
-        try {
-            const bookData = req.body;
-            
-            // Validation
-            if (!bookData.titre || !bookData.auteur) {
-                return res.status(400).json({ message: 'Titre et auteur sont requis' });
-            }
-            
-            // Gérer l'image
-            if (req.file) {
-                bookData.image = req.file.filename;
-            }
-            
-            // Créer le livre
-            const bookId = await Book.create(bookData);
-            
-            res.status(201).json({
-                message: 'Livre créé avec succès',
-                bookId
-            });
-            
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Erreur serveur' });
+createBook: async (req, res) => {
+    try {
+        // Crée un objet bookData sûr
+        const bookData = {
+            titre: req.body.titre,
+            auteur: req.body.auteur,
+            description: req.body.description || null,
+            categorie: req.body.category_id || null, // attention: ton formulaire envoie category_id
+            isbn: req.body.isbn || null,
+            date_publication: req.body.date_publication || null,
+            nombre_exemplaires: parseInt(req.body.nombre_exemplaires) || 1,
+            exemplaires_disponibles: parseInt(req.body.nombre_exemplaires) || 1,
+            image: req.file ? req.file.filename : null
+        };
+        
+        // Validation
+        if (!bookData.titre || !bookData.auteur) {
+            return res.status(400).json({ message: 'Titre et auteur sont requis' });
         }
-    },
+        
+        // Créer le livre
+        const bookId = await Book.create(bookData);
+        
+        res.status(201).json({
+            message: 'Livre créé avec succès',
+            bookId
+        });
+        
+    } catch (error) {
+        console.error('CREATE BOOK ERROR 👉', error);
+        res.status(500).json({
+            message: 'Erreur serveur',
+            error: error.message
+        });
+    }
+},
+
 
     // Récupérer tous les livres
     getAllBooks: async (req, res) => {

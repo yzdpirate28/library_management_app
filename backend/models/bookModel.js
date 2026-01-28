@@ -2,35 +2,28 @@ const pool = require('../config/database');
 
 class Book {
     static async create(bookData) {
-        const [result] = await pool.execute(
-            `INSERT INTO livres 
-            (titre, auteur, description, categorie, isbn, date_publication, nombre_exemplaires, exemplaires_disponibles, image) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                bookData.titre,
-                bookData.auteur,
-                bookData.description,
-                bookData.categorie,
-                bookData.isbn,
-                bookData.date_publication,
-                bookData.nombre_exemplaires,
-                bookData.nombre_exemplaires, // Initialement tous disponibles
-                bookData.image
-            ]
-        );
+const [result] = await pool.execute(
+    `INSERT INTO livres 
+    (titre, auteur, description, categorie, isbn, date_publication, nombre_exemplaires, exemplaires_disponibles, image) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+        bookData.titre,
+        bookData.auteur,
+        bookData.description || null,
+        bookData.categorie || null,
+        bookData.isbn || null,
+        bookData.date_publication || null,
+        bookData.nombre_exemplaires,
+        bookData.nombre_exemplaires,
+        bookData.image || null
+    ]
+);
+
         return result.insertId;
     }
 
-    static async findAll({ page = 1, limit = 10, search = '', category = '', sortBy = 'id', order = 'DESC' }) {
-        // Ensure integers for pagination
-        const pageNum = parseInt(page) || 1;
-        const limitNum = parseInt(limit) || 10;
-        const offset = (pageNum - 1) * limitNum;
-        
-        // Validate column names to prevent SQL injection
-        const allowedColumns = ['id', 'titre', 'auteur', 'categorie', 'date_publication'];
-        const validSortBy = allowedColumns.includes(sortBy) ? sortBy : 'id';
-        const validOrder = ['ASC', 'DESC'].includes(order.toUpperCase()) ? order.toUpperCase() : 'DESC';
+    static async findAll({ page = 1, limit = 10, search = '', category = '', sortBy = 'created_at', order = 'DESC' }) {
+        const offset = (page - 1) * limit;
         
         let query = `
             SELECT * FROM livres 
@@ -48,8 +41,8 @@ class Book {
             params.push(category);
         }
         
-        query += ` ORDER BY ${validSortBy} ${validOrder} LIMIT ? OFFSET ?`;
-        params.push(limitNum, offset);
+        query += ` ORDER BY ${sortBy} ${order} LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
         
         const [rows] = await pool.execute(query, params);
         
@@ -72,9 +65,9 @@ class Book {
         return {
             books: rows,
             total: countRows[0].total,
-            page: pageNum,
-            limit: limitNum,
-            totalPages: Math.ceil(countRows[0].total / limitNum)
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages: Math.ceil(countRows[0].total / limit)
         };
     }
 
@@ -84,24 +77,25 @@ class Book {
     }
 
     static async update(id, bookData) {
-        await pool.execute(
-            `UPDATE livres SET 
-            titre = ?, auteur = ?, description = ?, categorie = ?, 
-            isbn = ?, date_publication = ?, nombre_exemplaires = ?,
-            image = ?
-            WHERE id = ?`,
-            [
-                bookData.titre,
-                bookData.auteur,
-                bookData.description,
-                bookData.categorie,
-                bookData.isbn,
-                bookData.date_publication,
-                bookData.nombre_exemplaires,
-                bookData.image,
-                id
-            ]
-        );
+await pool.execute(
+    `UPDATE livres SET 
+    titre = ?, auteur = ?, description = ?, categorie = ?, 
+    isbn = ?, date_publication = ?, nombre_exemplaires = ?,
+    image = ?
+    WHERE id = ?`,
+    [
+        bookData.titre,
+        bookData.auteur,
+        bookData.description || null,
+        bookData.categorie || null,
+        bookData.isbn || null,
+        bookData.date_publication || null,
+        bookData.nombre_exemplaires,
+        bookData.image || null,
+        id
+    ]
+);
+
     }
 
     static async delete(id) {

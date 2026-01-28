@@ -50,15 +50,19 @@ export const authService = {
 export const bookService = {
     getAllBooks: (params) => api.get('/books', { params }),
     getBookById: (id) => api.get(`/books/${id}`),
-    createBook: (bookData) => {
-        const formData = new FormData();
-        Object.keys(bookData).forEach(key => {
-            formData.append(key, bookData[key]);
-        });
-        return api.post('/books', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-    },
+createBook: (bookData) => {
+  const formData = new FormData();
+
+Object.keys(bookData).forEach((key) => {
+    if (bookData[key] === undefined) bookData[key] = null;
+});
+
+  return api.post('/books', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+}
+
+,
     updateBook: (id, bookData) => {
         const formData = new FormData();
         Object.keys(bookData).forEach(key => {
